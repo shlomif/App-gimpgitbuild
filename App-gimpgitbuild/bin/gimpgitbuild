@@ -1,0 +1,17 @@
+#!/usr/bin/perl
+
+# PODNAME: App-gimpgitbuild
+
+use strict;
+use warnings;
+
+use App::gimpgitbuild;
+App::gimpgitbuild->run;
+
+__END__
+
+=head1 NAME
+
+gimpgitbuild - command line utility to automatically build GIMP and its dependencies from git.
+
+=cut
