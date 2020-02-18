@@ -20,11 +20,18 @@ sub abstract
 
 sub opt_spec
 {
+    return ();
+
+=begin foo
     return (
         [ "output|o=s", "Output path" ],
         [ "title=s",    "Chart Title" ],
         [ 'exec|e=s@',  "Execute command on the output" ]
     );
+=end foo
+
+=cut
+
 }
 
 sub _do_system
@@ -148,7 +155,8 @@ sub execute
     );
 
     use Term::ANSIColor qw/ colored /;
-    print colored( ['bold green'], "\n== Success ==\n\n" );
+    print colored( [ $ENV{HARNESS_SUMMARY_COLOR_SUCCESS} || 'bold green' ],
+        "\n== Success ==\n\n" );
     return;
 }
 
@@ -158,7 +166,6 @@ __END__
 
 =head1 NAME
 
-csv2chart svg - generate an .svg file of a chart from CSV data (requires a recent version of
-gnumeric's ssconvert utility).
+gimpgitbuild build - command line utility to automatically build GIMP and its dependencies from git.
 
 =cut

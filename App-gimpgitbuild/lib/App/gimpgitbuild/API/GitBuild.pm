@@ -10,7 +10,7 @@ __END__
 
 =head1 NAME
 
-App::gimpgitbuild::API::GitBuild - API
+App::gimpgitbuild::API::GitBuild - common API
 
 =head1 FUNCTIONS
 
