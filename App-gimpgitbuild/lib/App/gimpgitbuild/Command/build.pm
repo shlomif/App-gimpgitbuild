@@ -99,11 +99,12 @@ sub execute
     $ENV{PATH}            = $env->{PATH};
     $ENV{PKG_CONFIG_PATH} = $env->{PKG_CONFIG_PATH};
     $ENV{XDG_DATA_DIRS}   = $env->{XDG_DATA_DIRS};
+    my $base_src_dir = $obj->base_git_clones_dir;
 
     my $GNOME_GIT = 'https://gitlab.gnome.org/GNOME';
     _git_build(
         {
-            git_co    => "$HOME/Download/unpack/graphics/gimp/babl/git/babl",
+            git_co    => "$base_src_dir/babl/git/babl",
             url       => "$GNOME_GIT/babl",
             prefix    => "$babl_p",
             use_meson => 1,
@@ -111,7 +112,7 @@ sub execute
     );
     _git_build(
         {
-            git_co    => "$HOME/Download/unpack/graphics/gimp/gegl/git/gegl",
+            git_co    => "$base_src_dir/gegl/git/gegl",
             url       => "$GNOME_GIT/gegl",
             prefix    => "$gegl_p",
             use_meson => 1,
@@ -119,8 +120,7 @@ sub execute
     );
     _git_build(
         {
-            git_co =>
-                "$HOME/Download/unpack/graphics/gimp/libmypaint/git/libmypaint",
+            git_co    => "$base_src_dir/libmypaint/git/libmypaint",
             url       => "https://github.com/mypaint/libmypaint.git",
             prefix    => "$mypaint_p",
             use_meson => 0,
@@ -130,8 +130,7 @@ sub execute
     );
     _git_build(
         {
-            git_co =>
-"$HOME/Download/unpack/graphics/gimp/libmypaint/git/mypaint-brushes",
+            git_co    => "$base_src_dir/libmypaint/git/mypaint-brushes",
             url       => "https://github.com/Jehan/mypaint-brushes.git",
             prefix    => "$mypaint_p",
             use_meson => 0,
@@ -139,12 +138,12 @@ sub execute
         }
     );
 
-# autoconf_git_build "$HOME/Download/unpack/graphics/gimp/git/gimp" "$GNOME_GIT"/gimp "$HOME/apps/gimp-devel"
+# autoconf_git_build "$base_src_dir/git/gimp" "$GNOME_GIT"/gimp "$HOME/apps/gimp-devel"
     _git_build(
         {
-            git_co    => "$HOME/Download/unpack/graphics/gimp/git/gimp",
+            git_co    => "$base_src_dir/git/gimp",
             url       => "$GNOME_GIT/gimp",
-            prefix    => "$HOME/apps/gimp-devel",
+            prefix    => $obj->gimp_p,
             use_meson => 1,
         }
     );

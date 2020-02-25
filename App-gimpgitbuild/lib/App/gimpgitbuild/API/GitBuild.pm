@@ -32,10 +32,24 @@ sub babl_p
     return $self->install_base_dir . "/babl";
 }
 
+sub gimp_p
+{
+    my $self = shift;
+    return $self->install_base_dir . "/gimp-devel";
+}
+
 sub gegl_p
 {
     my $self = shift;
     return $self->install_base_dir . "/gegl";
+}
+
+sub base_git_clones_dir
+{
+    my $self = shift;
+
+    return $ENV{GIMPGITBUILD__BASE_CLONES_DIR}
+        // ( $self->home_dir . "/Download/unpack/graphics/gimp" );
 }
 
 sub new_env
@@ -81,6 +95,10 @@ The BABL install prefix.
 
 The GEGL install prefix.
 
+=head2 gimp_p
+
+The GIMP install prefix.
+
 =head2 mypaint_p
 
 The libmypaint install prefix.
@@ -88,5 +106,11 @@ The libmypaint install prefix.
 =head2 new_env
 
 Returns a hash reference of new environment variables to override.
+
+=head2 base_git_clones_dir
+
+The base filesystem directory path for the git repository clones.
+Can be overrided by setting the C<GIMPGITBUILD__BASE_CLONES_DIR> environment
+variable.
 
 =cut
