@@ -95,19 +95,10 @@ sub execute
     my $gegl_p           = "$install_base_dir/gegl";
     my $babl_p           = "$install_base_dir/babl";
     my $mypaint_p        = "$install_base_dir/libmypaint";
-    $ENV{PATH}            = "$gegl_p/bin:$ENV{PATH}";
-    $ENV{PKG_CONFIG_PATH} = join(
-        ":",
-        (
-            map {
-                my $p = $_;
-                map { "$p/$_/pkgconfig" } qw# share lib64 lib  #
-            } ( $babl_p, $gegl_p, $mypaint_p )
-        ),
-        ( $ENV{PKG_CONFIG_PATH} // '' )
-    );
-    $ENV{XDG_DATA_DIRS} =
-"$gegl_p/share:$mypaint_p/share:$mypaint_p/share/pkgconfig:$babl_p/share:$ENV{XDG_DATA_DIRS}";
+    my $env              = $obj->new_env;
+    $ENV{PATH}            = $env->{PATH};
+    $ENV{PKG_CONFIG_PATH} = $env->{PKG_CONFIG_PATH};
+    $ENV{XDG_DATA_DIRS}   = $env->{XDG_DATA_DIRS};
 
     my $GNOME_GIT = 'https://gitlab.gnome.org/GNOME';
     _git_build(

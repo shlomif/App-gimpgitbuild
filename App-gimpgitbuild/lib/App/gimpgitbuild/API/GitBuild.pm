@@ -20,6 +20,49 @@ sub _build_install_base_dir
     return $self->home_dir . "/apps/graphics";
 }
 
+sub mypaint_p
+{
+    my $self = shift;
+    return $self->install_base_dir . "/libmypaint";
+}
+
+sub babl_p
+{
+    my $self = shift;
+    return $self->install_base_dir . "/babl";
+}
+
+sub gegl_p
+{
+    my $self = shift;
+    return $self->install_base_dir . "/gegl";
+}
+
+sub new_env
+{
+    my $self            = shift;
+    my $gegl_p          = $self->gegl_p;
+    my $babl_p          = $self->babl_p;
+    my $mypaint_p       = $self->mypaint_p;
+    my $PKG_CONFIG_PATH = join(
+        ":",
+        (
+            map {
+                my $p = $_;
+                map { "$p/$_/pkgconfig" } qw# share lib64 lib  #
+            } ( $babl_p, $gegl_p, $mypaint_p )
+        ),
+        ( $ENV{PKG_CONFIG_PATH} // '' )
+    );
+    my $XDG_DATA_DIRS =
+"$gegl_p/share:$mypaint_p/share:$mypaint_p/share/pkgconfig:$babl_p/share:$ENV{XDG_DATA_DIRS}";
+    return +{
+        XDG_DATA_DIRS   => $XDG_DATA_DIRS,
+        PKG_CONFIG_PATH => $PKG_CONFIG_PATH,
+        PATH            => "$gegl_p/bin:$ENV{PATH}",
+    };
+}
+
 1;
 
 __END__
@@ -28,8 +71,22 @@ __END__
 
 App::gimpgitbuild::API::GitBuild - common API
 
-=head1 FUNCTIONS
+=head1 METHODS
 
-=head2 fill_in
+=head2 babl_p
+
+The BABL install prefix.
+
+=head2 gegl_p
+
+The GEGL install prefix.
+
+=head2 mypaint_p
+
+The libmypaint install prefix.
+
+=head2 new_env
+
+Returns a hash reference of new environment variables to override.
 
 =cut

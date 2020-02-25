@@ -1,5 +1,8 @@
 Revision history for App-gimpgitbuild
 
+0.2.0   2020-02-25
+    - Add the "env" subcommand.
+
 0.0.2   2020-02-18
     - Rebuild with updated deps to avoid old links in generated POD.
 
