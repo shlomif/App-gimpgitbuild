@@ -17,7 +17,8 @@ sub _build_home_dir
 sub _build_install_base_dir
 {
     my $self = shift;
-    return $self->home_dir . "/apps/graphics";
+    return $ENV{GIMPGITBUILD__BASE_INSTALL_DIR}
+        // ( $self->home_dir . "/apps/graphics" );
 }
 
 sub mypaint_p
@@ -106,6 +107,11 @@ The libmypaint install prefix.
 =head2 new_env
 
 Returns a hash reference of new environment variables to override.
+
+=head2 install_base_dir
+
+Can be overrided by setting the C<GIMPGITBUILD__BASE_INSTALL_DIR> environment
+variable.
 
 =head2 base_git_clones_dir
 
