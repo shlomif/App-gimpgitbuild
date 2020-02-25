@@ -8,6 +8,8 @@ use App::gimpgitbuild -command;
 
 use Path::Tiny qw/ path tempdir tempfile cwd /;
 
+use App::gimpgitbuild::API::GitBuild ();
+
 sub description
 {
     return "build gimp from git";
@@ -85,12 +87,14 @@ sub execute
     my $output_fn = $opt->{output};
     my $exe       = $opt->{exec} // [];
 
-    my $fh = \*STDIN;
+    my $fh  = \*STDIN;
+    my $obj = App::gimpgitbuild::API::GitBuild->new;
 
-    my $HOME      = $ENV{HOME};
-    my $gegl_p    = "$HOME/apps/graphics/gegl";
-    my $babl_p    = "$HOME/apps/graphics/babl";
-    my $mypaint_p = "$HOME/apps/graphics/libmypaint";
+    my $HOME             = $obj->home_dir;
+    my $install_base_dir = $obj->install_base_dir;
+    my $gegl_p           = "$install_base_dir/gegl";
+    my $babl_p           = "$install_base_dir/babl";
+    my $mypaint_p        = "$install_base_dir/libmypaint";
     $ENV{PATH}            = "$gegl_p/bin:$ENV{PATH}";
     $ENV{PKG_CONFIG_PATH} = join(
         ":",
