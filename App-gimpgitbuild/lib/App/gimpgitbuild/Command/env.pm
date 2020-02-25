@@ -12,7 +12,7 @@ use App::gimpgitbuild::API::GitBuild ();
 
 sub description
 {
-    return "build gimp from git";
+    return "set the environment for using or building GIMP-from-git";
 }
 
 sub abstract
