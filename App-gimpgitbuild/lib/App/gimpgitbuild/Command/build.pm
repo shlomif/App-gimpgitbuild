@@ -9,6 +9,7 @@ use App::gimpgitbuild -command;
 use Path::Tiny qw/ path tempdir tempfile cwd /;
 
 use App::gimpgitbuild::API::GitBuild ();
+use Git::Sync::App                   ();
 
 sub description
 {
@@ -72,7 +73,7 @@ qq#NOCONFIGURE=1 ./autogen.sh && ./configure --prefix="$args->{prefix}" && make 
     _do_system(
         {
             cmd => [
-qq#cd "$git_co" && git checkout "$args->{branch}" && ($args->{tag} || git s origin "$args->{branch}") && #
+qq#cd "$git_co" && git checkout "$args->{branch}" && ($args->{tag} || $^X -MGit::Sync::App -e "Git::Sync::App->new->run" -- sync origin "$args->{branch}") && #
                     . ( $args->{use_meson} ? $meson1 : $autoconf1 )
             ]
         }
