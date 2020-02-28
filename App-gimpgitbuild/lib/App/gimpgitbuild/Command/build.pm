@@ -66,8 +66,13 @@ sub _git_build
         path( $args->{git_co} )->parent->mkpath;
         _do_system( { cmd => [qq#git clone "$args->{url}" "$git_co"#] } );
     }
+
+    # See:
+    # https://github.com/libfuse/libfuse/issues/212
+    # Ubuntu/etc. places it under $prefix/lib/$arch by default.
+    my $UBUNTU_MESON_LIBDIR_OVERRIDE = "-D libdir=lib";
     my $meson1 =
-qq#mkdir -p "build" && cd build && meson --prefix="$args->{prefix}" .. && ninja -j4 && ninja -j4 test && ninja -j4 install#;
+qq#mkdir -p "build" && cd build && meson --prefix="$args->{prefix}" $UBUNTU_MESON_LIBDIR_OVERRIDE .. && ninja -j4 && ninja -j4 test && ninja -j4 install#;
     my $autoconf1 =
 qq#NOCONFIGURE=1 ./autogen.sh && ./configure --prefix="$args->{prefix}" && make -j4 && @{[_check()]} && make install#;
     _do_system(
