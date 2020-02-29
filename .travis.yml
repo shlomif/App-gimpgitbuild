@@ -8,6 +8,7 @@ addons:
     apt:
         packages:
             - build-essential
+            - gir1.2-gexiv2-0.10
             - gir1.2-glib-2.0
             - gir1.2-gtk-3.0
             - gir1.2-json-1.0
@@ -15,6 +16,7 @@ addons:
             - intltool
             - json-glib-tools
             - libexpat-dev
+            - libgexiv2-dev
             - libgirepository1.0-dev
             - libgtk-3-bin
             - libgtk-3-dev
