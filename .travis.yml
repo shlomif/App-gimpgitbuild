@@ -12,6 +12,7 @@ addons:
             - meson
             - ninja-build
             - python3-pip
+            - python3-setuptools
 language: perl
 perl:
     - '5.30'
