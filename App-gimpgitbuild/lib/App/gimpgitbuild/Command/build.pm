@@ -57,6 +57,17 @@ sub _check
 sub _git_build
 {
     my $args = shift;
+    my $id   = $args->{id};
+
+    my $KEY = "GIMPGITBUILD__SKIP_BUILDS_RE";
+    if ( exists $ENV{$KEY} )
+    {
+        my $re = $ENV{$KEY};
+        if ( $id =~ /$re/ )
+        {
+            return;
+        }
+    }
     $args->{branch} //= 'master';
     $args->{tag}    //= 'false';
 
@@ -110,6 +121,7 @@ sub execute
     my $GNOME_GIT = 'https://gitlab.gnome.org/GNOME';
     _git_build(
         {
+            id        => "babl",
             git_co    => "$base_src_dir/babl/git/babl",
             url       => "$GNOME_GIT/babl",
             prefix    => "$babl_p",
@@ -118,6 +130,7 @@ sub execute
     );
     _git_build(
         {
+            id        => "gegl",
             git_co    => "$base_src_dir/gegl/git/gegl",
             url       => "$GNOME_GIT/gegl",
             prefix    => "$gegl_p",
@@ -126,6 +139,7 @@ sub execute
     );
     _git_build(
         {
+            id        => "libmypaint",
             git_co    => "$base_src_dir/libmypaint/git/libmypaint",
             url       => "https://github.com/mypaint/libmypaint.git",
             prefix    => "$mypaint_p",
@@ -136,6 +150,7 @@ sub execute
     );
     _git_build(
         {
+            id        => "mypaint-brushes",
             git_co    => "$base_src_dir/libmypaint/git/mypaint-brushes",
             url       => "https://github.com/Jehan/mypaint-brushes.git",
             prefix    => "$mypaint_p",
@@ -147,6 +162,7 @@ sub execute
 # autoconf_git_build "$base_src_dir/git/gimp" "$GNOME_GIT"/gimp "$HOME/apps/gimp-devel"
     _git_build(
         {
+            id        => "gimp",
             git_co    => "$base_src_dir/git/gimp",
             url       => "$GNOME_GIT/gimp",
             prefix    => $obj->gimp_p,
