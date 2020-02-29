@@ -11,6 +11,7 @@ addons:
             - libhunspell-dev
             - meson
             - ninja-build
+            - python3-pip
 language: perl
 perl:
     - '5.30'
