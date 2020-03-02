@@ -1,5 +1,9 @@
 Revision history for App-gimpgitbuild
 
+0.10.0   2020-03-02
+    - Use the API's class' extracted methods.
+    - Remove some unused copy+pasted code.
+
 0.8.0   2020-02-29
     - Add the GIMPGITBUILD__SKIP_BUILDS_RE environment variable
 

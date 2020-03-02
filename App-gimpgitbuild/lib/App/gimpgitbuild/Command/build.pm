@@ -107,12 +107,8 @@ sub execute
     my $fh  = \*STDIN;
     my $obj = App::gimpgitbuild::API::GitBuild->new;
 
-    my $HOME             = $obj->home_dir;
-    my $install_base_dir = $obj->install_base_dir;
-    my $gegl_p           = "$install_base_dir/gegl";
-    my $babl_p           = "$install_base_dir/babl";
-    my $mypaint_p        = "$install_base_dir/libmypaint";
-    my $env              = $obj->new_env;
+    my $HOME = $obj->home_dir;
+    my $env  = $obj->new_env;
     $ENV{PATH}            = $env->{PATH};
     $ENV{PKG_CONFIG_PATH} = $env->{PKG_CONFIG_PATH};
     $ENV{XDG_DATA_DIRS}   = $env->{XDG_DATA_DIRS};
@@ -124,7 +120,7 @@ sub execute
             id        => "babl",
             git_co    => "$base_src_dir/babl/git/babl",
             url       => "$GNOME_GIT/babl",
-            prefix    => "$babl_p",
+            prefix    => $obj->babl_p,
             use_meson => 1,
         }
     );
@@ -133,7 +129,7 @@ sub execute
             id        => "gegl",
             git_co    => "$base_src_dir/gegl/git/gegl",
             url       => "$GNOME_GIT/gegl",
-            prefix    => "$gegl_p",
+            prefix    => $obj->gegl_p,
             use_meson => 1,
         }
     );
@@ -142,7 +138,7 @@ sub execute
             id        => "libmypaint",
             git_co    => "$base_src_dir/libmypaint/git/libmypaint",
             url       => "https://github.com/mypaint/libmypaint.git",
-            prefix    => "$mypaint_p",
+            prefix    => $obj->mypaint_p,
             use_meson => 0,
             branch    => "v1.3.0",
             tag       => "true",
@@ -153,7 +149,7 @@ sub execute
             id        => "mypaint-brushes",
             git_co    => "$base_src_dir/libmypaint/git/mypaint-brushes",
             url       => "https://github.com/Jehan/mypaint-brushes.git",
-            prefix    => "$mypaint_p",
+            prefix    => $obj->mypaint_p,
             use_meson => 0,
             branch    => "v1.3.x",
         }
