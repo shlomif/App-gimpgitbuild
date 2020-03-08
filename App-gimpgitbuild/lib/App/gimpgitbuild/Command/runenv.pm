@@ -1,4 +1,4 @@
-package App::gimpgitbuild::Command::env;
+package App::gimpgitbuild::Command::runenv;
 
 use strict;
 use warnings;
@@ -12,7 +12,7 @@ use App::gimpgitbuild::API::GitBuild ();
 
 sub description
 {
-    return "set the environment for building GIMP-from-git";
+    return "set the environment for running GIMP-from-git";
 }
 
 sub abstract
@@ -47,9 +47,7 @@ sub execute
 
     my $env = $obj->new_env;
     print <<"EOF";
-export PATH="$env->{PATH}" ;
-export PKG_CONFIG_PATH="$env->{PKG_CONFIG_PATH}" ;
-export XDG_DATA_DIRS="$env->{XDG_DATA_DIRS}" ;
+export LD_LIBRARY_PATH="$env->{LD_LIBRARY_PATH}" ;
 EOF
 
     return;
@@ -61,11 +59,12 @@ __END__
 
 =head1 NAME
 
-gimpgitbuild env - set the environment vars for building gimp-from-git
+gimpgitbuild runenv - set the environment in the shell for running the gimp-from-git
+installation.
 
 =head1 SYNOPSIS
 
     # In your sh-compatible shell:
-    eval "$(gimpgitbuild env)"
+    eval "$(gimpgitbuild runenv)"
 
 =cut
