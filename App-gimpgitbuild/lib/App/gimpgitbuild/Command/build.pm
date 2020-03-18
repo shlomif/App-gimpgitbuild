@@ -126,6 +126,7 @@ sub execute
     );
     _git_build(
         {
+            branch    => "wip/issue226",
             id        => "gegl",
             git_co    => "$base_src_dir/gegl/git/gegl",
             url       => "$GNOME_GIT/gegl",
