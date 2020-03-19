@@ -1,5 +1,8 @@
 Revision history for App-gimpgitbuild
 
+0.12.1   2020-03-19
+    - Avoid "undefined" warning for an environment variable.
+
 0.12.0   2020-03-08
     - Add the eval "$(gimpgitbuild runenv)" sub-command for LD_LIBRARY_PATH
     runtime vars.
