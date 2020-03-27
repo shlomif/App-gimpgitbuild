@@ -158,6 +158,9 @@ sub execute
         }
     );
 
+    my $KEY        = 'GIMPGITBUILD__BUILD_GIMP_USING_MESON';
+    my $GIMP_BUILD = ( exists( $ENV{$KEY} ) ? $ENV{$KEY} : 1 );
+
 # autoconf_git_build "$base_src_dir/git/gimp" "$GNOME_GIT"/gimp "$HOME/apps/gimp-devel"
     _git_build(
         {
@@ -165,7 +168,7 @@ sub execute
             git_co    => "$base_src_dir/git/gimp",
             url       => "$GNOME_GIT/gimp",
             prefix    => $obj->gimp_p,
-            use_meson => 1,
+            use_meson => $GIMP_BUILD,
         }
     );
 
