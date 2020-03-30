@@ -56,8 +56,9 @@ sub _check
 
 sub _git_build
 {
-    my $args = shift;
-    my $id   = $args->{id};
+    my $args                 = shift;
+    my $id                   = $args->{id};
+    my $extra_configure_args = ( $args->{extra_configure_args} // [] );
 
     my $KEY = "GIMPGITBUILD__SKIP_BUILDS_RE";
     if ( exists $ENV{$KEY} )
@@ -88,7 +89,7 @@ sub _git_build
     my $meson1 =
 qq#mkdir -p "$MESON_BUILD_DIR" && cd "$MESON_BUILD_DIR" && meson --prefix="$args->{prefix}" $UBUNTU_MESON_LIBDIR_OVERRIDE .. && ninja $PAR_JOBS && ninja $PAR_JOBS test && ninja $PAR_JOBS install#;
     my $autoconf1 =
-qq#NOCONFIGURE=1 ./autogen.sh && ./configure --prefix="$args->{prefix}" && make $PAR_JOBS && @{[_check()]} && make install#;
+qq#NOCONFIGURE=1 ./autogen.sh && ./configure @{$extra_configure_args} --prefix="$args->{prefix}" && make $PAR_JOBS && @{[_check()]} && make install#;
     _do_system(
         {
             cmd => [
@@ -164,11 +165,12 @@ sub execute
 # autoconf_git_build "$base_src_dir/git/gimp" "$GNOME_GIT"/gimp "$HOME/apps/gimp-devel"
     _git_build(
         {
-            id        => "gimp",
-            git_co    => "$base_src_dir/git/gimp",
-            url       => "$GNOME_GIT/gimp",
-            prefix    => $obj->gimp_p,
-            use_meson => $GIMP_BUILD,
+            id                   => "gimp",
+            extra_configure_args => [ qw# --enable-debug #, ],
+            git_co               => "$base_src_dir/git/gimp",
+            url                  => "$GNOME_GIT/gimp",
+            prefix               => $obj->gimp_p,
+            use_meson            => $GIMP_BUILD,
         }
     );
 
