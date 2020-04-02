@@ -6,6 +6,7 @@ use 5.014;
 
 use App::gimpgitbuild -command;
 
+use File::Which qw/ which /;
 use Path::Tiny qw/ path tempdir tempfile cwd /;
 
 use App::gimpgitbuild::API::GitBuild ();
@@ -101,6 +102,17 @@ qq#cd "$git_co" && git checkout "$args->{branch}" && ($args->{tag} || $^X -MGit:
     return;
 }
 
+sub _which_xvfb_run
+{
+    my $path = which('xvfb-run');
+    if ( not defined($path) )
+    {
+        die
+"Cannot find xvfb-run ! It is required for tests to succeed: see https://gitlab.gnome.org/GNOME/gimp/-/issues/2884";
+    }
+    return;
+}
+
 sub execute
 {
     my ( $self, $opt, $args ) = @_;
@@ -116,6 +128,7 @@ sub execute
     $ENV{PATH}            = $env->{PATH};
     $ENV{PKG_CONFIG_PATH} = $env->{PKG_CONFIG_PATH};
     $ENV{XDG_DATA_DIRS}   = $env->{XDG_DATA_DIRS};
+    _which_xvfb_run();
     my $base_src_dir = $obj->base_git_clones_dir;
 
     my $GNOME_GIT = 'https://gitlab.gnome.org/GNOME';
@@ -144,7 +157,7 @@ sub execute
             url       => "https://github.com/mypaint/libmypaint.git",
             prefix    => $obj->mypaint_p,
             use_meson => 0,
-            branch    => "v1.3.0",
+            branch    => "v1.5.1",
             tag       => "true",
         }
     );
