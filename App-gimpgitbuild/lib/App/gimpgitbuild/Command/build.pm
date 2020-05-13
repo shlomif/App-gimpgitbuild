@@ -57,6 +57,7 @@ sub _check
 
 sub _git_build
 {
+    my $self                 = shift;
     my $args                 = shift;
     my $id                   = $args->{id};
     my $extra_configure_args = ( $args->{extra_configure_args} // [] );
@@ -136,7 +137,7 @@ sub execute
     my $base_src_dir = $obj->base_git_clones_dir;
 
     my $GNOME_GIT = 'https://gitlab.gnome.org/GNOME';
-    _git_build(
+    $self->_git_build(
         {
             id        => "babl",
             git_co    => "$base_src_dir/babl/git/babl",
@@ -145,7 +146,7 @@ sub execute
             use_meson => 1,
         }
     );
-    _git_build(
+    $self->_git_build(
         {
             id        => "gegl",
             git_co    => "$base_src_dir/gegl/git/gegl",
@@ -154,7 +155,7 @@ sub execute
             use_meson => 1,
         }
     );
-    _git_build(
+    $self->_git_build(
         {
             id        => "libmypaint",
             git_co    => "$base_src_dir/libmypaint/git/libmypaint",
@@ -165,7 +166,7 @@ sub execute
             tag       => "true",
         }
     );
-    _git_build(
+    $self->_git_build(
         {
             id        => "mypaint-brushes",
             git_co    => "$base_src_dir/libmypaint/git/mypaint-brushes",
@@ -180,7 +181,7 @@ sub execute
     my $GIMP_BUILD = ( exists( $ENV{$KEY} ) ? $ENV{$KEY} : 1 );
 
 # autoconf_git_build "$base_src_dir/git/gimp" "$GNOME_GIT"/gimp "$HOME/apps/gimp-devel"
-    _git_build(
+    $self->_git_build(
         {
             id                   => "gimp",
             extra_configure_args => [ qw# --enable-debug #, ],
