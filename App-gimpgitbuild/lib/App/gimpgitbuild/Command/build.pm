@@ -87,15 +87,19 @@ sub _git_build
     my $MESON_BUILD_DIR              = ( $ENV{GIMPGITBUILD__MESON_BUILD_DIR}
             // "to-del--gimpgitbuild--meson-build" );
     my $PAR_JOBS = ( $ENV{GIMPGITBUILD__PAR_JOBS_FLAGS} // '-j4' );
-    my $meson1 =
+    my $meson_build_shell_cmd =
 qq#mkdir -p "$MESON_BUILD_DIR" && cd "$MESON_BUILD_DIR" && meson --prefix="$args->{prefix}" $UBUNTU_MESON_LIBDIR_OVERRIDE .. && ninja $PAR_JOBS && ninja $PAR_JOBS test && ninja $PAR_JOBS install#;
-    my $autoconf1 =
+    my $autoconf_build_shell_cmd =
 qq#NOCONFIGURE=1 ./autogen.sh && ./configure @{$extra_configure_args} --prefix="$args->{prefix}" && make $PAR_JOBS && @{[_check()]} && make install#;
     _do_system(
         {
             cmd => [
 qq#cd "$git_co" && git checkout "$args->{branch}" && ($args->{tag} || $^X -MGit::Sync::App -e "Git::Sync::App->new->run" -- sync origin "$args->{branch}") && #
-                    . ( $args->{use_meson} ? $meson1 : $autoconf1 )
+                    . (
+                      $args->{use_meson}
+                    ? $meson_build_shell_cmd
+                    : $autoconf_build_shell_cmd
+                    )
             ]
         }
     );
