@@ -66,6 +66,22 @@ BEGIN
         $skip_builds_re = qr/$re_str/;
     }
 }
+my $MESON_BUILD_DIR = ( $ENV{GIMPGITBUILD__MESON_BUILD_DIR}
+        // "to-del--gimpgitbuild--meson-build" );
+
+# See:
+# https://github.com/libfuse/libfuse/issues/212
+# Ubuntu/etc. places it under $prefix/lib/$arch by default.
+my $UBUNTU_MESON_LIBDIR_OVERRIDE = "-D libdir=lib";
+
+my $PAR_JOBS = ( $ENV{GIMPGITBUILD__PAR_JOBS_FLAGS} // '-j4' );
+
+sub _git_sync
+{
+    my ( $self, $args ) = @_;
+    return
+qq#$^X -MGit::Sync::App -e "Git::Sync::App->new->run" -- sync origin "$args->{branch}"#;
+}
 
 sub _git_build
 {
@@ -88,21 +104,15 @@ sub _git_build
         _do_system( { cmd => [qq#git clone "$args->{url}" "$git_co"#] } );
     }
 
-    # See:
-    # https://github.com/libfuse/libfuse/issues/212
-    # Ubuntu/etc. places it under $prefix/lib/$arch by default.
-    my $UBUNTU_MESON_LIBDIR_OVERRIDE = "-D libdir=lib";
-    my $MESON_BUILD_DIR              = ( $ENV{GIMPGITBUILD__MESON_BUILD_DIR}
-            // "to-del--gimpgitbuild--meson-build" );
-    my $PAR_JOBS = ( $ENV{GIMPGITBUILD__PAR_JOBS_FLAGS} // '-j4' );
     my $meson_build_shell_cmd =
 qq#mkdir -p "$MESON_BUILD_DIR" && cd "$MESON_BUILD_DIR" && meson --prefix="$args->{prefix}" $UBUNTU_MESON_LIBDIR_OVERRIDE .. && ninja $PAR_JOBS && ninja $PAR_JOBS test && ninja $PAR_JOBS install#;
     my $autoconf_build_shell_cmd =
 qq#NOCONFIGURE=1 ./autogen.sh && ./configure @{$extra_configure_args} --prefix="$args->{prefix}" && make $PAR_JOBS && @{[_check()]} && make install#;
+    my $sync_cmd = $self->_git_sync( { branch => $args->{branch}, } );
     _do_system(
         {
             cmd => [
-qq#cd "$git_co" && git checkout "$args->{branch}" && ($args->{tag} || $^X -MGit::Sync::App -e "Git::Sync::App->new->run" -- sync origin "$args->{branch}") && #
+qq#cd "$git_co" && git checkout "$args->{branch}" && ( $args->{tag} || $sync_cmd ) && #
                     . (
                       $args->{use_meson}
                     ? $meson_build_shell_cmd
