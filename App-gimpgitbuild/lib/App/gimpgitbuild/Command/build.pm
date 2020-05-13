@@ -55,6 +55,18 @@ sub _check
     return ( length( $ENV{SKIP_CHECK} ) ? "true" : "make check" );
 }
 
+my $skip_builds_re;
+
+BEGIN
+{
+    my $KEY = "GIMPGITBUILD__SKIP_BUILDS_RE";
+    if ( exists $ENV{$KEY} )
+    {
+        my $re_str = $ENV{$KEY};
+        $skip_builds_re = qr/$re_str/;
+    }
+}
+
 sub _git_build
 {
     my $self                 = shift;
@@ -62,14 +74,9 @@ sub _git_build
     my $id                   = $args->{id};
     my $extra_configure_args = ( $args->{extra_configure_args} // [] );
 
-    my $KEY = "GIMPGITBUILD__SKIP_BUILDS_RE";
-    if ( exists $ENV{$KEY} )
+    if ( defined($skip_builds_re) and $id =~ $skip_builds_re )
     {
-        my $re = $ENV{$KEY};
-        if ( $id =~ /$re/ )
-        {
-            return;
-        }
+        return;
     }
     $args->{branch} //= 'master';
     $args->{tag}    //= 'false';
