@@ -179,7 +179,7 @@ sub execute
             url       => "https://github.com/mypaint/libmypaint.git",
             prefix    => $obj->mypaint_p,
             use_meson => 0,
-            branch    => "v1.5.1",
+            branch    => "v1.6.1",
             tag       => "true",
         }
     );
