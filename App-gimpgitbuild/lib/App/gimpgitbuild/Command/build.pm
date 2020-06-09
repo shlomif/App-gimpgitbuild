@@ -142,7 +142,7 @@ sub _ascertain_lack_of_gtk_warnings
     my $path = which('gvim');
     if ( defined($path) )
     {
-        my $stderr = `"$path" -f /dev/null +q 2>&1`;
+        my $stderr = `"$path" -u NONE -U NONE -f /dev/null +q 2>&1`;
         if ( $stderr =~ /\S/ )
         {
             die
