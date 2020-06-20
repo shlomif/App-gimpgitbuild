@@ -2,12 +2,13 @@ package App::gimpgitbuild::Command::build;
 
 use strict;
 use warnings;
+use autodie;
 use 5.014;
 
 use App::gimpgitbuild -command;
 
 use File::Which qw/ which /;
-use Path::Tiny qw/ path tempdir tempfile cwd /;
+use Path::Tiny qw/ path cwd /;
 
 use App::gimpgitbuild::API::GitBuild ();
 use Git::Sync::App                   ();
@@ -24,6 +25,18 @@ sub _api_obj
     return $self->{_api_obj};
 }
 
+sub _process_executor
+{
+    my $self = shift;
+
+    if (@_)
+    {
+        $self->{_process_executor} = shift;
+    }
+
+    return $self->{_process_executor};
+}
+
 sub description
 {
     return "build gimp from git";
@@ -36,7 +49,8 @@ sub abstract
 
 sub opt_spec
 {
-    return ( [ "mode=s", "Mode (e.g: \"clean\")" ], );
+    return ( [ "mode=s", "Mode (e.g: \"clean\")" ],
+        [ "process-exe=s", qq#Process executor (= "sh" or "perl")#, ] );
 
 =begin foo
     return (
@@ -99,8 +113,10 @@ sub _git_build
 {
     my $self                 = shift;
     my $args                 = shift;
+    my $orig_cwd             = cwd()->absolute();
     my $id                   = $args->{id};
     my $extra_configure_args = ( $args->{extra_configure_args} // [] );
+    my $SHELL_PREFIX         = "set -e -x";
 
     if ( defined($skip_builds_re) and $id =~ $skip_builds_re )
     {
@@ -127,6 +143,29 @@ sub _git_build
     my $chdir_cmd = sub {
         return $shell_cmd->( qq#cd "# . shift(@_) . qq#"# );
     };
+    if ( $self->_process_executor() eq 'perl' )
+    {
+        $shell_cmd = sub {
+            my $cmd = shift;
+            return sub {
+                return _do_system(
+                    {
+                        cmd => ["$SHELL_PREFIX ; $cmd"],
+                    }
+                );
+            };
+        };
+        $chdir_cmd = sub {
+            my $dirname = shift;
+            return sub {
+                if ( not chdir($dirname) )
+                {
+                    die qq#Failed changing directory to "$dirname"!#;
+                }
+            };
+        };
+    }
+
     my @meson_build_shell_cmd = (
         $shell_cmd->(qq#mkdir -p "$BUILD_DIR"#),
         $chdir_cmd->($BUILD_DIR),
@@ -163,9 +202,17 @@ qq#meson --prefix="$args->{prefix}" $UBUNTU_MESON_LIBDIR_OVERRIDE ..#
         ),
     );
 
-    my $aggregate_shell_command = "set -e -x ; " . join( " ; ", @commands );
-
     my $run = sub {
+        if ( $self->_process_executor() eq 'perl' )
+        {
+            foreach my $cb (@commands)
+            {
+                $cb->();
+            }
+            return;
+        }
+        my $aggregate_shell_command =
+            "$SHELL_PREFIX ; " . join( " ; ", @commands );
         return _do_system(
             {
                 cmd => [ $aggregate_shell_command, ]
@@ -189,6 +236,7 @@ qq#meson --prefix="$args->{prefix}" $UBUNTU_MESON_LIBDIR_OVERRIDE ..#
             $on_failure->( { exception => $Err, }, );
         }
     }
+    chdir($orig_cwd);
     return;
 }
 
@@ -227,6 +275,16 @@ sub execute
     {
         die "Unsupported mode '$mode'!";
     }
+
+    my $_process_executor = ( $opt->{process_exe} || 'perl' );
+    if (
+        not(   ( $_process_executor eq 'sh' )
+            or ( $_process_executor eq 'perl' ) )
+        )
+    {
+        die "Unsupported process-exe '$_process_executor'!";
+    }
+    $self->_process_executor($_process_executor);
 
     my $fh  = \*STDIN;
     my $obj = App::gimpgitbuild::API::GitBuild->new;
