@@ -107,7 +107,7 @@ sub _git_build
     my $meson_build_shell_cmd =
 qq#mkdir -p "$MESON_BUILD_DIR" && cd "$MESON_BUILD_DIR" && meson --prefix="$args->{prefix}" $UBUNTU_MESON_LIBDIR_OVERRIDE .. && ninja $PAR_JOBS && ninja $PAR_JOBS test && ninja $PAR_JOBS install#;
     my $autoconf_build_shell_cmd =
-qq#NOCONFIGURE=1 ./autogen.sh && ./configure @{$extra_configure_args} --prefix="$args->{prefix}" && make $PAR_JOBS && @{[_check()]} && make install#;
+qq#NOCONFIGURE=1 ./autogen.sh && mkdir -p "$MESON_BUILD_DIR" && cd "$MESON_BUILD_DIR" && ../configure @{$extra_configure_args} --prefix="$args->{prefix}" && make $PAR_JOBS && @{[_check()]} && make install#;
     my $sync_cmd = $self->_git_sync( { branch => $args->{branch}, } );
     _do_system(
         {
