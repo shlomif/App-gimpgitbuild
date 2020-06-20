@@ -1,5 +1,10 @@
 Revision history for App-gimpgitbuild
 
+0.22.0   2020-06-20
+    - Add the --process-exe flag to gimpgitbuild build
+        - It defaults to "perl" which is the new behavior.
+    - Cleanups, code refactoring, and sanity checks.
+
 0.20.0   2020-06-20
     - Add a note for failed meson-using builds of GIMP.
     - Refactoring and cleanups.
