@@ -12,6 +12,18 @@ use Path::Tiny qw/ path tempdir tempfile cwd /;
 use App::gimpgitbuild::API::GitBuild ();
 use Git::Sync::App                   ();
 
+sub _api_obj
+{
+    my $self = shift;
+
+    if (@_)
+    {
+        $self->{_api_obj} = shift;
+    }
+
+    return $self->{_api_obj};
+}
+
 sub description
 {
     return "build gimp from git";
@@ -97,10 +109,15 @@ sub _git_build
     $args->{branch} //= 'master';
     $args->{tag}    //= 'false';
 
-    my $git_co = $args->{git_co};
-    if ( !-e "$args->{git_co}" )
+    my $git_co = (
+        $args->{git_co} // (
+                  $self->_api_obj()->base_git_clones_dir() . "/"
+                . $args->{git_checkout_subdir}
+        )
+    );
+    if ( !-e $git_co )
     {
-        path( $args->{git_co} )->parent->mkpath;
+        path($git_co)->parent->mkpath;
         _do_system( { cmd => [qq#git clone "$args->{url}" "$git_co"#] } );
     }
 
@@ -183,6 +200,7 @@ sub execute
 
     my $fh  = \*STDIN;
     my $obj = App::gimpgitbuild::API::GitBuild->new;
+    $self->_api_obj($obj);
 
     my $HOME = $obj->home_dir;
     my $env  = $obj->new_env;
@@ -197,37 +215,37 @@ sub execute
     my $GNOME_GIT = 'https://gitlab.gnome.org/GNOME';
     $self->_git_build(
         {
-            id        => "babl",
-            git_co    => "$base_src_dir/babl/git/babl",
-            url       => "$GNOME_GIT/babl",
-            prefix    => $obj->babl_p,
-            use_meson => 1,
+            id                  => "babl",
+            git_checkout_subdir => "babl/git/babl",
+            url                 => "$GNOME_GIT/babl",
+            prefix              => $obj->babl_p,
+            use_meson           => 1,
         }
     );
     $self->_git_build(
         {
-            id        => "gegl",
-            git_co    => "$base_src_dir/gegl/git/gegl",
-            url       => "$GNOME_GIT/gegl",
-            prefix    => $obj->gegl_p,
-            use_meson => 1,
+            id                  => "gegl",
+            git_checkout_subdir => "gegl/git/gegl",
+            url                 => "$GNOME_GIT/gegl",
+            prefix              => $obj->gegl_p,
+            use_meson           => 1,
         }
     );
     $self->_git_build(
         {
-            id        => "libmypaint",
-            git_co    => "$base_src_dir/libmypaint/git/libmypaint",
-            url       => "https://github.com/mypaint/libmypaint.git",
-            prefix    => $obj->mypaint_p,
-            use_meson => 0,
-            branch    => "v1.6.1",
-            tag       => "true",
+            id                  => "libmypaint",
+            git_checkout_subdir => "libmypaint/git/libmypaint",
+            url                 => "https://github.com/mypaint/libmypaint.git",
+            prefix              => $obj->mypaint_p,
+            use_meson           => 0,
+            branch              => "v1.6.1",
+            tag                 => "true",
         }
     );
     $self->_git_build(
         {
-            id        => "mypaint-brushes",
-            git_co    => "$base_src_dir/libmypaint/git/mypaint-brushes",
+            id                  => "mypaint-brushes",
+            git_checkout_subdir => "libmypaint/git/mypaint-brushes",
             url       => "https://github.com/Jehan/mypaint-brushes.git",
             prefix    => $obj->mypaint_p,
             use_meson => 0,
@@ -243,7 +261,7 @@ sub execute
         {
             id                   => "gimp",
             extra_configure_args => [ qw# --enable-debug #, ],
-            git_co               => "$base_src_dir/git/gimp",
+            git_checkout_subdir  => "git/gimp",
             url                  => "$GNOME_GIT/gimp",
             prefix               => $obj->gimp_p,
             use_meson            => $BUILD_GIMP_USING_MESON,
