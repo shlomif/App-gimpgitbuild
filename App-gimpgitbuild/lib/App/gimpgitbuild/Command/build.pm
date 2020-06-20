@@ -149,6 +149,14 @@ sub _git_build
         _do_system( { cmd => [qq#git clone "$args->{url}" "$git_co"#] } );
     }
 
+    my $_autodie_chdir = sub {
+        my $dirname = shift;
+        if ( not chdir($dirname) )
+        {
+            die qq#Failed changing directory to "$dirname"!#;
+        }
+        return;
+    };
     my $shell_cmd = sub {
         return shift;
     };
@@ -171,10 +179,7 @@ sub _git_build
         $chdir_cmd = sub {
             my $dirname = shift;
             return sub {
-                if ( not chdir($dirname) )
-                {
-                    die qq#Failed changing directory to "$dirname"!#;
-                }
+                return $_autodie_chdir->($dirname);
             };
         };
     }
@@ -249,7 +254,7 @@ qq#meson --prefix="$args->{prefix}" $UBUNTU_MESON_LIBDIR_OVERRIDE ..#
             $on_failure->( { exception => $Err, }, );
         }
     }
-    chdir($orig_cwd);
+    $_autodie_chdir->($orig_cwd);
     return;
 }
 
