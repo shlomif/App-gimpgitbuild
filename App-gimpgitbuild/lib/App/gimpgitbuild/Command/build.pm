@@ -13,6 +13,18 @@ use Path::Tiny qw/ path cwd /;
 use App::gimpgitbuild::API::GitBuild ();
 use Git::Sync::App                   ();
 
+sub _mode
+{
+    my $self = shift;
+
+    if (@_)
+    {
+        $self->{_mode} = shift;
+    }
+
+    return $self->{_mode};
+}
+
 sub _api_obj
 {
     my $self = shift;
@@ -143,7 +155,8 @@ sub _git_build
     my $chdir_cmd = sub {
         return $shell_cmd->( qq#cd "# . shift(@_) . qq#"# );
     };
-    if ( $self->_process_executor() eq 'perl' )
+    my $PERL_EXECUTE = ( $self->_process_executor() eq 'perl' );
+    if ($PERL_EXECUTE)
     {
         $shell_cmd = sub {
             my $cmd = shift;
@@ -194,7 +207,7 @@ qq#meson --prefix="$args->{prefix}" $UBUNTU_MESON_LIBDIR_OVERRIDE ..#
         $shell_cmd->(qq#git checkout "$args->{branch}"#),
         $shell_cmd->(qq#( $args->{tag} || $sync_cmd )#),
         (
-            ( $self->{mode} eq 'clean' ) ? @clean_mode_shell_cmd
+            ( $self->_mode() eq 'clean' ) ? @clean_mode_shell_cmd
             : (
                   $args->{use_meson} ? @meson_build_shell_cmd
                 : @autoconf_build_shell_cmd
@@ -203,7 +216,7 @@ qq#meson --prefix="$args->{prefix}" $UBUNTU_MESON_LIBDIR_OVERRIDE ..#
     );
 
     my $run = sub {
-        if ( $self->_process_executor() eq 'perl' )
+        if ($PERL_EXECUTE)
         {
             foreach my $cb (@commands)
             {
@@ -297,7 +310,7 @@ sub execute
     $ENV{XDG_DATA_DIRS}   = $env->{XDG_DATA_DIRS};
     _which_xvfb_run();
     _ascertain_lack_of_gtk_warnings();
-    $self->{mode} = $mode;
+    $self->_mode($mode);
 
     my $GNOME_GIT = 'https://gitlab.gnome.org/GNOME';
     $self->_git_build(
