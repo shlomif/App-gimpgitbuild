@@ -109,20 +109,39 @@ qq#mkdir -p "$BUILD_DIR" && cd "$BUILD_DIR" && meson --prefix="$args->{prefix}" 
     my $autoconf_build_shell_cmd =
 qq#NOCONFIGURE=1 ./autogen.sh && mkdir -p "$BUILD_DIR" && cd "$BUILD_DIR" && ../configure @{$extra_configure_args} --prefix="$args->{prefix}" && make $PAR_JOBS && @{[_check()]} && make install#;
     my $sync_cmd = $self->_git_sync( { branch => $args->{branch}, } );
-    _do_system(
-        {
-            cmd => [
+    my $run      = sub {
+        return _do_system(
+            {
+                cmd => [
 qq#cd "$git_co" && git checkout "$args->{branch}" && ( $args->{tag} || $sync_cmd ) && #
-                    . (
-                    ( $self->{mode} eq 'clean' ) ? "git clean -dxf ."
-                    : (
-                          $args->{use_meson} ? $meson_build_shell_cmd
-                        : $autoconf_build_shell_cmd
-                    )
-                    )
-            ]
+                        . (
+                        ( $self->{mode} eq 'clean' ) ? "git clean -dxf ."
+                        : (
+                              $args->{use_meson} ? $meson_build_shell_cmd
+                            : $autoconf_build_shell_cmd
+                        )
+                        )
+                ]
+            }
+        );
+    };
+
+    my $on_failure = $args->{on_failure};
+
+    if ( !$on_failure )
+    {
+        $run->();
+    }
+    else
+    {
+        eval { $run->(); };
+        my $Err = $@;
+
+        if ($Err)
+        {
+            $on_failure->( { exception => $Err, }, );
         }
-    );
+    }
     return;
 }
 
@@ -216,8 +235,8 @@ sub execute
         }
     );
 
-    my $KEY        = 'GIMPGITBUILD__BUILD_GIMP_USING_MESON';
-    my $GIMP_BUILD = ( exists( $ENV{$KEY} ) ? $ENV{$KEY} : 1 );
+    my $KEY                    = 'GIMPGITBUILD__BUILD_GIMP_USING_MESON';
+    my $BUILD_GIMP_USING_MESON = ( exists( $ENV{$KEY} ) ? $ENV{$KEY} : 1 );
 
 # autoconf_git_build "$base_src_dir/git/gimp" "$GNOME_GIT"/gimp "$HOME/apps/gimp-devel"
     $self->_git_build(
@@ -227,7 +246,24 @@ sub execute
             git_co               => "$base_src_dir/git/gimp",
             url                  => "$GNOME_GIT/gimp",
             prefix               => $obj->gimp_p,
-            use_meson            => $GIMP_BUILD,
+            use_meson            => $BUILD_GIMP_USING_MESON,
+            on_failure           => sub {
+                my ($args) = @_;
+                my $Err = $args->{exception};
+                if ( !$BUILD_GIMP_USING_MESON )
+                {
+                    die $Err;
+                }
+                STDERR->print( $Err, "\n" );
+                STDERR->print(<<"EOF");
+Meson-using builds of GIMP are known to be error prone. Please try setting
+the "$KEY" environment variable to "0", and run gimpgitbuild again, e.g using:
+
+    export $KEY="0"
+
+EOF
+                die "Meson build failure";
+            },
         }
     );
 
