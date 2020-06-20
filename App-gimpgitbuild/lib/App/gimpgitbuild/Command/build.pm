@@ -210,7 +210,6 @@ sub execute
     _which_xvfb_run();
     _ascertain_lack_of_gtk_warnings();
     $self->{mode} = $mode;
-    my $base_src_dir = $obj->base_git_clones_dir;
 
     my $GNOME_GIT = 'https://gitlab.gnome.org/GNOME';
     $self->_git_build(
@@ -256,7 +255,6 @@ sub execute
     my $KEY                    = 'GIMPGITBUILD__BUILD_GIMP_USING_MESON';
     my $BUILD_GIMP_USING_MESON = ( exists( $ENV{$KEY} ) ? $ENV{$KEY} : 1 );
 
-# autoconf_git_build "$base_src_dir/git/gimp" "$GNOME_GIT"/gimp "$HOME/apps/gimp-devel"
     $self->_git_build(
         {
             id                   => "gimp",
