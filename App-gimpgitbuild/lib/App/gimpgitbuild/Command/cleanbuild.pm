@@ -9,8 +9,7 @@ use App::gimpgitbuild -command;
 
 use File::Which qw/ which /;
 
-use App::gimpgitbuild::API::GitBuild ();
-use App::gimpgitbuild::API::Worker   ();
+use App::gimpgitbuild::API::Worker ();
 
 sub description
 {
@@ -45,9 +44,7 @@ sub execute
     my $mode              = 'clean';
     my $_process_executor = 'perl';
 
-    my $obj    = App::gimpgitbuild::API::GitBuild->new;
     my $worker = App::gimpgitbuild::API::Worker->new;
-    $worker->_api_obj($obj);
     $worker->_mode($mode);
     $worker->_process_executor($_process_executor);
 

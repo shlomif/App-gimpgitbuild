@@ -99,12 +99,10 @@ sub execute
 
     my $obj    = App::gimpgitbuild::API::GitBuild->new;
     my $worker = App::gimpgitbuild::API::Worker->new;
-    $worker->_api_obj($obj);
     $worker->_mode($mode);
     $worker->_process_executor($_process_executor);
 
-    my $HOME = $obj->home_dir;
-    my $env  = $obj->new_env;
+    my $env = $obj->new_env;
     $ENV{PATH}            = $env->{PATH};
     $ENV{PKG_CONFIG_PATH} = $env->{PKG_CONFIG_PATH};
     $ENV{XDG_DATA_DIRS}   = $env->{XDG_DATA_DIRS};

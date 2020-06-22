@@ -7,9 +7,13 @@ use 5.014;
 use Moo;
 
 use Path::Tiny qw/ path cwd /;
-use Git::Sync::App ();
+use Git::Sync::App                   ();
+use App::gimpgitbuild::API::GitBuild ();
 
-has '_api_obj'          => ( is => 'rw' );
+has '_api_obj' => (
+    is      => 'rw',
+    default => sub { return App::gimpgitbuild::API::GitBuild->new(); }
+);
 has '_mode'             => ( is => 'rw' );
 has '_process_executor' => ( is => 'rw' );
 
