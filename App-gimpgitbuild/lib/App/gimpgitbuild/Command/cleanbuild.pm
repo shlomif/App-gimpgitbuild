@@ -41,11 +41,9 @@ sub execute
 {
     my ( $self, $opt, $args ) = @_;
 
-    my $mode              = 'clean';
     my $_process_executor = 'perl';
 
-    my $worker = App::gimpgitbuild::API::Worker->new;
-    $worker->_mode($mode);
+    my $worker = App::gimpgitbuild::API::Worker->new( { _mode => 'clean', } );
     $worker->_process_executor($_process_executor);
 
     $worker->_run_the_mode_on_all_repositories();

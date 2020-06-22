@@ -98,8 +98,7 @@ sub execute
     }
 
     my $obj    = App::gimpgitbuild::API::GitBuild->new;
-    my $worker = App::gimpgitbuild::API::Worker->new;
-    $worker->_mode($mode);
+    my $worker = App::gimpgitbuild::API::Worker->new( { _mode => $mode, } );
     $worker->_process_executor($_process_executor);
 
     my $env = $obj->new_env;
