@@ -124,40 +124,46 @@ sub _git_build
         };
     }
 
-    my @meson_build_shell_cmd = (
-        $shell_cmd->(qq#mkdir -p "$BUILD_DIR"#),
-        $chdir_cmd->($BUILD_DIR),
-        $shell_cmd->(
+    my $gen_meson_build_cmds = sub {
+        return [
+            $shell_cmd->(qq#mkdir -p "$BUILD_DIR"#),
+            $chdir_cmd->($BUILD_DIR),
+            $shell_cmd->(
 qq#meson --prefix="$args->{prefix}" $UBUNTU_MESON_LIBDIR_OVERRIDE ..#
-        ),
-        $shell_cmd->(qq#ninja $PAR_JOBS#),
-        $shell_cmd->(qq#ninja $PAR_JOBS test#),
-        $shell_cmd->(qq#ninja $PAR_JOBS install#)
+            ),
+            $shell_cmd->(qq#ninja $PAR_JOBS#),
+            $shell_cmd->(qq#ninja $PAR_JOBS test#),
+            $shell_cmd->(qq#ninja $PAR_JOBS install#),
+        ];
+    };
+    my $gen_autoconf_build_cmds = sub {
+        return [
+            $shell_cmd->(qq#NOCONFIGURE=1 ./autogen.sh#),
+            $shell_cmd->(qq#mkdir -p "$BUILD_DIR"#),
+            $chdir_cmd->($BUILD_DIR),
+            $shell_cmd->(
+qq#../configure @{$extra_configure_args} --prefix="$args->{prefix}"#
+            ),
+            $shell_cmd->(qq#make $PAR_JOBS#),
+            $shell_cmd->(qq#@{[_check()]}#),
+            $shell_cmd->(qq#make install#),
+        ];
+    };
+    my $gen_clean_mode_cmds =
+        sub { return [ $shell_cmd->(qq#git clean -dxf .#), ]; };
+    my $commands_gen = (
+        ( $self->_mode() eq 'clean' ) ? $gen_clean_mode_cmds
+        : (
+              $args->{use_meson} ? $gen_meson_build_cmds
+            : $gen_autoconf_build_cmds
+        )
     );
-    my @autoconf_build_shell_cmd = (
-        $shell_cmd->(qq#NOCONFIGURE=1 ./autogen.sh#),
-        $shell_cmd->(qq#mkdir -p "$BUILD_DIR"#),
-        $chdir_cmd->($BUILD_DIR),
-        $shell_cmd->(
-            qq#../configure @{$extra_configure_args} --prefix="$args->{prefix}"#
-        ),
-        $shell_cmd->(qq#make $PAR_JOBS#),
-        $shell_cmd->(qq#@{[_check()]}#),
-        $shell_cmd->(qq#make install#)
-    );
-    my @clean_mode_shell_cmd = ( $shell_cmd->(qq#git clean -dxf .#) );
     my $sync_cmd = $self->_git_sync( { branch => $args->{branch}, } );
     my @commands = (
         $chdir_cmd->($git_co),
         $shell_cmd->(qq#git checkout "$args->{branch}"#),
         $shell_cmd->(qq#( $args->{tag} || $sync_cmd )#),
-        (
-            ( $self->_mode() eq 'clean' ) ? @clean_mode_shell_cmd
-            : (
-                  $args->{use_meson} ? @meson_build_shell_cmd
-                : @autoconf_build_shell_cmd
-            )
-        ),
+        @{ $commands_gen->() },
     );
 
     my $run = sub {

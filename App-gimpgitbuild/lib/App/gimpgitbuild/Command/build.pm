@@ -85,11 +85,10 @@ sub execute
         die "Unsupported process-exe '$_process_executor'!";
     }
 
-    my $obj    = App::gimpgitbuild::API::GitBuild->new;
     my $worker = App::gimpgitbuild::API::Worker->new(
         { _mode => $mode, _process_executor => $_process_executor, } );
 
-    my $env = $obj->new_env;
+    my $env = App::gimpgitbuild::API::GitBuild->new()->new_env();
     $ENV{PATH}            = $env->{PATH};
     $ENV{PKG_CONFIG_PATH} = $env->{PKG_CONFIG_PATH};
     $ENV{XDG_DATA_DIRS}   = $env->{XDG_DATA_DIRS};
