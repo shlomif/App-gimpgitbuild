@@ -97,7 +97,6 @@ sub execute
         die "Unsupported process-exe '$_process_executor'!";
     }
 
-    my $fh     = \*STDIN;
     my $obj    = App::gimpgitbuild::API::GitBuild->new;
     my $worker = App::gimpgitbuild::API::Worker->new;
     $worker->_api_obj($obj);
