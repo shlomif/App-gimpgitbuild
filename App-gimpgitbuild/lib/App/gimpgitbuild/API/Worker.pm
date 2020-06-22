@@ -7,6 +7,7 @@ use 5.014;
 use Moo;
 
 use Path::Tiny qw/ path cwd /;
+use Git::Sync::App ();
 
 has '_api_obj'          => ( is => 'rw' );
 has '_mode'             => ( is => 'rw' );
