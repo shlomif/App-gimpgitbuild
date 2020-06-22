@@ -1,5 +1,12 @@
 Revision history for App-gimpgitbuild
 
+0.24.0   2020-06-22
+    - Add the "gimpgitbuild cleanbuild" sub-command.
+        - It is an alias to "gimpgitbuild build --mode=clean"
+        which will keep working for backwards compatibility.
+    - Extract an API::Worker class to facilitate the "cleanbuild"
+    change.
+
 0.22.0   2020-06-20
     - Add the --process-exe flag to gimpgitbuild build
         - It defaults to "perl" which is the new behavior.
