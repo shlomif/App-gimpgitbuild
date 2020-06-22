@@ -13,18 +13,6 @@ use App::gimpgitbuild::API::GitBuild ();
 use App::gimpgitbuild::API::Worker   ();
 use Git::Sync::App                   ();
 
-sub _process_executor
-{
-    my $self = shift;
-
-    if (@_)
-    {
-        $self->{_process_executor} = shift;
-    }
-
-    return $self->{_process_executor};
-}
-
 sub description
 {
     return "build gimp from git";
@@ -98,8 +86,8 @@ sub execute
     }
 
     my $obj    = App::gimpgitbuild::API::GitBuild->new;
-    my $worker = App::gimpgitbuild::API::Worker->new( { _mode => $mode, } );
-    $worker->_process_executor($_process_executor);
+    my $worker = App::gimpgitbuild::API::Worker->new(
+        { _mode => $mode, _process_executor => $_process_executor, } );
 
     my $env = $obj->new_env;
     $ENV{PATH}            = $env->{PATH};

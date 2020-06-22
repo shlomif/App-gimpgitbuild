@@ -15,7 +15,7 @@ has '_api_obj' => (
     default => sub { return App::gimpgitbuild::API::GitBuild->new(); }
 );
 has '_mode'             => ( is => 'ro', required => 1, );
-has '_process_executor' => ( is => 'rw' );
+has '_process_executor' => ( is => 'ro', required => 1, );
 
 sub _do_system
 {
