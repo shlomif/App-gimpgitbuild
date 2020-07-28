@@ -263,7 +263,8 @@ sub _run_the_mode_on_all_repositories
             on_failure           => sub {
                 my ($args) = @_;
                 my $Err = $args->{exception};
-                if ( !$BUILD_GIMP_USING_MESON )
+                if (   ( $worker->_mode() eq 'clean' )
+                    or ( !$BUILD_GIMP_USING_MESON ) )
                 {
                     die $Err;
                 }
