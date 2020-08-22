@@ -204,16 +204,23 @@ qq#../configure @{$extra_configure_args} --prefix="$args->{prefix}"#
     return;
 }
 
+sub _get_gnome_git_url
+{
+    my ( $self, $proj ) = @_;
+    my $GNOME_GIT = 'https://gitlab.gnome.org/GNOME';
+
+    return "${GNOME_GIT}/${proj}.git/";
+}
+
 sub _run_the_mode_on_all_repositories
 {
-    my ($worker)  = @_;
-    my $obj       = $worker->_api_obj();
-    my $GNOME_GIT = 'https://gitlab.gnome.org/GNOME';
+    my ($worker) = @_;
+    my $obj = $worker->_api_obj();
     $worker->_git_build(
         {
             id                  => "babl",
             git_checkout_subdir => "babl/git/babl",
-            url                 => "$GNOME_GIT/babl",
+            url                 => $worker->_get_gnome_git_url("babl"),
             prefix              => $obj->babl_p,
             use_meson           => 1,
         }
@@ -222,7 +229,7 @@ sub _run_the_mode_on_all_repositories
         {
             id                  => "gegl",
             git_checkout_subdir => "gegl/git/gegl",
-            url                 => "$GNOME_GIT/gegl",
+            url                 => $worker->_get_gnome_git_url("gegl"),
             prefix              => $obj->gegl_p,
             use_meson           => 1,
         }
@@ -257,7 +264,7 @@ sub _run_the_mode_on_all_repositories
             id                   => "gimp",
             extra_configure_args => [ qw# --enable-debug #, ],
             git_checkout_subdir  => "git/gimp",
-            url                  => "$GNOME_GIT/gimp",
+            url                  => $worker->_get_gnome_git_url("gimp"),
             prefix               => $obj->gimp_p,
             use_meson            => $BUILD_GIMP_USING_MESON,
             on_failure           => sub {
