@@ -307,8 +307,11 @@ sub _run_the_mode_on_all_repositories
 {
     my ($worker) = @_;
 
-    $worker->_override_mode("clean_install");
-    $worker->_run_all();
+    if ( $worker->_mode() eq 'build' )
+    {
+        $worker->_override_mode("clean_install");
+        $worker->_run_all();
+    }
     $worker->_override_mode("");
     $worker->_run_all();
 
