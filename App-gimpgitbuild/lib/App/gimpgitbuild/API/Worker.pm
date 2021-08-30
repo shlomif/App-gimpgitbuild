@@ -15,6 +15,7 @@ has '_api_obj' => (
     default => sub { return App::gimpgitbuild::API::GitBuild->new(); }
 );
 has '_mode'             => ( is => 'ro', required => 1, );
+has '_override_mode'    => ( is => 'rw', default  => "", );
 has '_process_executor' => ( is => 'ro', required => 1, );
 
 sub _do_system
@@ -104,7 +105,9 @@ sub _git_build
     my $chdir_cmd = sub {
         return $shell_cmd->( qq#cd "# . shift(@_) . qq#"# );
     };
-    my $PERL_EXECUTE = ( $self->_process_executor() eq 'perl' );
+    my $clean_install = ( $self->_override_mode() eq "clean_install" );
+    my $PERL_EXECUTE =
+        ( $clean_install or $self->_process_executor() eq 'perl' );
     if ($PERL_EXECUTE)
     {
         $shell_cmd = sub {
@@ -125,12 +128,20 @@ sub _git_build
         };
     }
 
+    my $prefix = $args->{prefix};
+
+    if ($clean_install)
+    {
+        $shell_cmd->(qq#rm -fr "$prefix"#)->();
+        return;
+    }
+
     my $gen_meson_build_cmds = sub {
         return [
             $shell_cmd->(qq#mkdir -p "$BUILD_DIR"#),
             $chdir_cmd->($BUILD_DIR),
             $shell_cmd->(
-qq#meson --prefix="$args->{prefix}" $UBUNTU_MESON_LIBDIR_OVERRIDE @{$extra_meson_args} ..#
+qq#meson --prefix="$prefix" $UBUNTU_MESON_LIBDIR_OVERRIDE @{$extra_meson_args} ..#
             ),
             $shell_cmd->(qq#ninja $PAR_JOBS#),
             $shell_cmd->(qq#ninja $PAR_JOBS test#),
@@ -143,8 +154,7 @@ qq#meson --prefix="$args->{prefix}" $UBUNTU_MESON_LIBDIR_OVERRIDE @{$extra_meson
             $shell_cmd->(qq#mkdir -p "$BUILD_DIR"#),
             $chdir_cmd->($BUILD_DIR),
             $shell_cmd->(
-qq#../configure @{$extra_configure_args} --prefix="$args->{prefix}"#
-            ),
+                qq#../configure @{$extra_configure_args} --prefix="$prefix"#),
             $shell_cmd->(qq#make $PAR_JOBS#),
             $shell_cmd->(qq#@{[_check()]}#),
             $shell_cmd->(qq#make install#),
@@ -213,7 +223,7 @@ sub _get_gnome_git_url
     return "${GNOME_GIT}/${proj}.git/";
 }
 
-sub _run_the_mode_on_all_repositories
+sub _run_all
 {
     my ($worker) = @_;
     my $obj = $worker->_api_obj();
@@ -290,6 +300,17 @@ EOF
             },
         }
     );
+    return;
+}
+
+sub _run_the_mode_on_all_repositories
+{
+    my ($worker) = @_;
+
+    $worker->_override_mode("clean_install");
+    $worker->_run_all();
+    $worker->_override_mode("");
+    $worker->_run_all();
 
     return;
 }
