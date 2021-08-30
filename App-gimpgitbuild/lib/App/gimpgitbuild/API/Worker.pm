@@ -68,6 +68,7 @@ sub _git_build
     my $orig_cwd             = cwd()->absolute();
     my $id                   = $args->{id};
     my $extra_configure_args = ( $args->{extra_configure_args} // [] );
+    my $extra_meson_args     = ( $args->{extra_meson_args}     // [] );
     my $SHELL_PREFIX         = "set -e -x";
 
     if ( defined($skip_builds_re) and $id =~ $skip_builds_re )
@@ -129,7 +130,7 @@ sub _git_build
             $shell_cmd->(qq#mkdir -p "$BUILD_DIR"#),
             $chdir_cmd->($BUILD_DIR),
             $shell_cmd->(
-qq#meson --prefix="$args->{prefix}" $UBUNTU_MESON_LIBDIR_OVERRIDE ..#
+qq#meson --prefix="$args->{prefix}" $UBUNTU_MESON_LIBDIR_OVERRIDE @{$extra_meson_args} ..#
             ),
             $shell_cmd->(qq#ninja $PAR_JOBS#),
             $shell_cmd->(qq#ninja $PAR_JOBS test#),
@@ -229,6 +230,7 @@ sub _run_the_mode_on_all_repositories
         {
             id                  => "gegl",
             git_checkout_subdir => "gegl/git/gegl",
+            extra_meson_args    => [ qw# -Dlua=disabled #, ],
             url                 => $worker->_get_gnome_git_url("gegl"),
             prefix              => $obj->gegl_p,
             use_meson           => 1,
@@ -262,7 +264,8 @@ sub _run_the_mode_on_all_repositories
     $worker->_git_build(
         {
             id                   => "gimp",
-            extra_configure_args => [ qw# --enable-debug #, ],
+            extra_configure_args => [ qw# --enable-debug --with-lua=no #, ],
+            extra_meson_args     => [ qw# -Dlua=false #, ],
             git_checkout_subdir  => "git/gimp",
             url                  => $worker->_get_gnome_git_url("gimp"),
             prefix               => $obj->gimp_p,

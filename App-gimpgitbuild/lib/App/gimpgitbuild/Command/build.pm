@@ -89,6 +89,7 @@ sub execute
         { _mode => $mode, _process_executor => $_process_executor, } );
 
     my $env = App::gimpgitbuild::API::GitBuild->new()->new_env();
+    $ENV{LD_LIBRARY_PATH} = $env->{LD_LIBRARY_PATH};
     $ENV{PATH}            = $env->{PATH};
     $ENV{PKG_CONFIG_PATH} = $env->{PKG_CONFIG_PATH};
     $ENV{XDG_DATA_DIRS}   = $env->{XDG_DATA_DIRS};
