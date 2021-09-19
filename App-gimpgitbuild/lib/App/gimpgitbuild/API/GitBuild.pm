@@ -45,6 +45,12 @@ sub gegl_p
     return $self->install_base_dir . "/gegl";
 }
 
+sub gexiv2_p
+{
+    my $self = shift;
+    return $self->gegl_p();
+}
+
 sub base_git_clones_dir
 {
     my $self = shift;
@@ -112,6 +118,10 @@ The BABL install prefix.
 =head2 gegl_p
 
 The GEGL install prefix.
+
+=head2 gexiv2_p
+
+The gexiv2 install prefix.
 
 =head2 gimp_p
 

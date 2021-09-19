@@ -246,6 +246,23 @@ sub _run_all
             use_meson           => 1,
         }
     );
+
+    # Override python3_girdir in gexiv2 in order to avoid having
+    # to run polkit's pkexec to install files as root/superuser.
+    my @gexiv2_girdir_override =
+        ( "-Dpython3_girdir=" . ( $obj->gexiv2_p() . "/lib/python3" ), );
+    $worker->_git_build(
+        {
+            id                  => "gexiv2",
+            git_checkout_subdir => "gexiv2/git/gexiv2",
+
+            # extra_meson_args    => [ qw# -Dlua=disabled #, ],
+            extra_meson_args => [ @gexiv2_girdir_override, ],
+            url              => $worker->_get_gnome_git_url("gexiv2"),
+            prefix           => $obj->gexiv2_p,
+            use_meson        => 1,
+        }
+    );
     $worker->_git_build(
         {
             id                  => "libmypaint",
