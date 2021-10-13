@@ -66,6 +66,17 @@ sub _ascertain_lack_of_gtk_warnings
     return;
 }
 
+sub _ascertain_gjs
+{
+    my $path = which('gjs');
+    if ( not defined($path) )
+    {
+        die
+"gjs must be present - please install it (see: https://gitlab.gnome.org/GNOME/gimp/-/issues/7341 )";
+    }
+    return;
+}
+
 sub execute
 {
     my ( $self, $opt, $args ) = @_;
@@ -95,6 +106,7 @@ sub execute
     $ENV{XDG_DATA_DIRS}   = $env->{XDG_DATA_DIRS};
     _which_xvfb_run();
     _ascertain_lack_of_gtk_warnings();
+    _ascertain_gjs();
 
     $worker->_run_the_mode_on_all_repositories();
 
