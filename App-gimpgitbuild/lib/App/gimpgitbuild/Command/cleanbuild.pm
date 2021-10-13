@@ -7,8 +7,6 @@ use 5.014;
 
 use App::gimpgitbuild -command;
 
-use File::Which qw/ which /;
-
 use App::gimpgitbuild::API::Worker ();
 
 sub description
