@@ -40,7 +40,7 @@ sub opt_spec
 
 }
 
-sub _which_xvfb_run
+sub _ascertain_xvfb_run_presence
 {
     my $path = which('xvfb-run');
     if ( not defined($path) )
@@ -66,13 +66,13 @@ sub _ascertain_lack_of_gtk_warnings
     return;
 }
 
-sub _ascertain_gjs
+sub _ascertain_gjs_presence
 {
     my $path = which('gjs');
     if ( not defined($path) )
     {
         die
-"gjs must be present - please install it (see: https://gitlab.gnome.org/GNOME/gimp/-/issues/7341 )";
+"gjs must be present for GIMP's tests to succeed - please install it (see: https://gitlab.gnome.org/GNOME/gimp/-/issues/7341 )";
     }
     return;
 }
@@ -104,9 +104,9 @@ sub execute
     $ENV{PATH}            = $env->{PATH};
     $ENV{PKG_CONFIG_PATH} = $env->{PKG_CONFIG_PATH};
     $ENV{XDG_DATA_DIRS}   = $env->{XDG_DATA_DIRS};
-    _which_xvfb_run();
+    _ascertain_xvfb_run_presence();
     _ascertain_lack_of_gtk_warnings();
-    _ascertain_gjs();
+    _ascertain_gjs_presence();
 
     $worker->_run_the_mode_on_all_repositories();
 
