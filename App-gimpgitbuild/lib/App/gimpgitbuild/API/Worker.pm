@@ -6,7 +6,7 @@ use 5.014;
 
 use Moo;
 
-use Path::Tiny qw/ path cwd /;
+use Path::Tiny                       qw/ path cwd /;
 use Git::Sync::App                   ();
 use App::gimpgitbuild::API::GitBuild ();
 
