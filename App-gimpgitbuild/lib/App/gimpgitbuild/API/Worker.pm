@@ -149,7 +149,7 @@ sub _git_build
             $shell_cmd->(qq#mkdir -p "$BUILD_DIR"#),
             $chdir_cmd->($BUILD_DIR),
             $shell_cmd->(
-qq#meson --prefix="$prefix" $UBUNTU_MESON_LIBDIR_OVERRIDE @{$extra_meson_args} ..#
+qq#meson setup --prefix="$prefix" $UBUNTU_MESON_LIBDIR_OVERRIDE @{$extra_meson_args} ..#
             ),
             $shell_cmd->(qq#ninja $PAR_JOBS#),
             @{
@@ -273,7 +273,8 @@ sub _run_all
             git_checkout_subdir => "gexiv2/git/gexiv2",
 
             # extra_meson_args    => [ qw# -Dlua=disabled #, ],
-            extra_meson_args => [ @gexiv2_girdir_override, ],
+            # extra_meson_args => [ @gexiv2_girdir_override, ],
+            extra_meson_args => [],
             url              => $worker->_get_gnome_git_url("gexiv2"),
             prefix           => $obj->gexiv2_p,
             use_meson        => 1,
@@ -308,7 +309,7 @@ sub _run_all
         {
             id                   => "gimp",
             extra_configure_args => [ qw# --enable-debug --with-lua=no #, ],
-            extra_meson_args     => [ qw# -Dlua=false #, ],
+            extra_meson_args     => [ qw# -Dlua=disabled #, ],
             git_checkout_subdir  => "git/gimp",
             install_before_test  => 1,
             url                  => $worker->_get_gnome_git_url("gimp"),
