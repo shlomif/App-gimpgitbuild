@@ -50,9 +50,23 @@ my $BUILD_DIR = ( $ENV{GIMPGITBUILD__MESON_BUILD_DIR}
 # Ubuntu/etc. places it under $prefix/lib/$arch by default.
 my $UBUNTU_MESON_LIBDIR_OVERRIDE = "-D libdir=lib";
 
+sub _wrap_check
+{
+    my ( $self, $cmd ) = @_;
+    my $ret = $cmd . ( ( length( $ENV{SKIP_CHECK} ) ? " || true" : '' ) );
+    return ($ret);
+}
+
 sub _check
 {
-    return ( length( $ENV{SKIP_CHECK} ) ? "true" : "make check" );
+    my ( $self, $args ) = @_;
+    return $self->_wrap_check("make check");
+}
+
+sub _ninja_check
+{
+    my ( $self, $args ) = @_;
+    return $self->_wrap_check("ninja test");
 }
 
 sub _git_sync
@@ -154,7 +168,7 @@ qq#meson setup --prefix="$prefix" $UBUNTU_MESON_LIBDIR_OVERRIDE @{$extra_meson_a
             $shell_cmd->(qq#ninja $PAR_JOBS#),
             @{
                 $test_install_order->(
-                    [ $shell_cmd->(qq#ninja $PAR_JOBS test#), ],
+                    [ $shell_cmd->(qq#@{[$self->_ninja_check()]}#), ],
                     [ $shell_cmd->(qq#ninja $PAR_JOBS install#), ]
                 )
             },
@@ -170,7 +184,7 @@ qq#meson setup --prefix="$prefix" $UBUNTU_MESON_LIBDIR_OVERRIDE @{$extra_meson_a
             $shell_cmd->(qq#make $PAR_JOBS#),
             @{
                 $test_install_order->(
-                    [ $shell_cmd->(qq#@{[_check()]}#), ],
+                    [ $shell_cmd->(qq#@{[$self->_check()]}#), ],
                     [ $shell_cmd->(qq#make install#), ]
                 )
             },
@@ -309,7 +323,7 @@ sub _run_all
         {
             id                   => "gimp",
             extra_configure_args => [ qw# --enable-debug --with-lua=no #, ],
-            extra_meson_args     => [ qw# -Dlua=disabled #, ],
+            extra_meson_args     => [ qw# #, ],
             git_checkout_subdir  => "git/gimp",
             install_before_test  => 1,
             url                  => $worker->_get_gnome_git_url("gimp"),
