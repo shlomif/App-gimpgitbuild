@@ -32,16 +32,28 @@ sub _do_system
 
 my $PAR_JOBS = ( $ENV{GIMPGITBUILD__PAR_JOBS_FLAGS} // '-j4' );
 my $skip_builds_re;
+my $forcify_tests_re;
 
 BEGIN
 {
-    my $KEY = "GIMPGITBUILD__SKIP_BUILDS_RE";
-    if ( exists $ENV{$KEY} )
     {
-        my $re_str = $ENV{$KEY};
-        $skip_builds_re = qr/$re_str/;
+        my $KEY = "GIMPGITBUILD__SKIP_BUILDS_RE";
+        if ( exists $ENV{$KEY} )
+        {
+            my $re_str = $ENV{$KEY};
+            $skip_builds_re = qr/$re_str/;
+        }
+    }
+    {
+        my $KEY = "GIMPGITBUILD__FORCE_TESTS_RE";
+        if ( exists $ENV{$KEY} )
+        {
+            my $re_str = $ENV{$KEY};
+            $forcify_tests_re = qr/$re_str/;
+        }
     }
 }
+
 my $BUILD_DIR = ( $ENV{GIMPGITBUILD__MESON_BUILD_DIR}
         // "to-del--gimpgitbuild--build-dir" );
 
@@ -52,21 +64,27 @@ my $UBUNTU_MESON_LIBDIR_OVERRIDE = "-D libdir=lib";
 
 sub _wrap_check
 {
-    my ( $self, $cmd ) = @_;
-    my $ret = $cmd . ( ( length( $ENV{SKIP_CHECK} ) ? " || true" : '' ) );
+    my ( $self, $id, $cmd ) = @_;
+    my $ret = $cmd
+        . (
+        (
+            length( $ENV{SKIP_CHECK} )
+                or ( defined($forcify_tests_re) and $id =~ $forcify_tests_re )
+        ) ? " || true" : ''
+        );
     return ($ret);
 }
 
 sub _check
 {
-    my ( $self, $args ) = @_;
-    return $self->_wrap_check("make check");
+    my ( $self, $id ) = @_;
+    return $self->_wrap_check( $id, "make check" );
 }
 
 sub _ninja_check
 {
-    my ( $self, $args ) = @_;
-    return $self->_wrap_check("ninja test");
+    my ( $self, $id ) = @_;
+    return $self->_wrap_check( $id, "ninja test" );
 }
 
 sub _git_sync
@@ -168,7 +186,7 @@ qq#meson setup --prefix="$prefix" $UBUNTU_MESON_LIBDIR_OVERRIDE @{$extra_meson_a
             $shell_cmd->(qq#ninja $PAR_JOBS#),
             @{
                 $test_install_order->(
-                    [ $shell_cmd->(qq#@{[$self->_ninja_check()]}#), ],
+                    [ $shell_cmd->(qq#@{[$self->_ninja_check($id)]}#), ],
                     [ $shell_cmd->(qq#ninja $PAR_JOBS install#), ]
                 )
             },
@@ -184,7 +202,7 @@ qq#meson setup --prefix="$prefix" $UBUNTU_MESON_LIBDIR_OVERRIDE @{$extra_meson_a
             $shell_cmd->(qq#make $PAR_JOBS#),
             @{
                 $test_install_order->(
-                    [ $shell_cmd->(qq#@{[$self->_check()]}#), ],
+                    [ $shell_cmd->(qq#@{[$self->_check($id)]}#), ],
                     [ $shell_cmd->(qq#make install#), ]
                 )
             },
